@@ -69,7 +69,7 @@ This document plans the conversion of the Todoist MCP server into a ChatGPT-comp
 │     ChatGPT → redirect to https://todoist.com/oauth/authorize      │
 │                                                                     │
 │  2. User authorizes on Todoist                                     │
-│     Todoist → redirect to https://todoist.rodda.xyz/oauth/callback │
+│     Todoist → redirect to https://todoist.your-domain.com/oauth/callback │
 │                                                                     │
 │  3. Your server exchanges code for token                           │
 │     Your API → POST https://todoist.com/oauth/access_token         │
@@ -92,7 +92,7 @@ To use Todoist OAuth, you must:
 
 1. **Register an app** at https://developer.todoist.com/appconsole.html
 2. **Obtain**: Client ID, Client Secret
-3. **Configure redirect URI**: `https://todoist.rodda.xyz/oauth/callback`
+3. **Configure redirect URI**: `https://todoist.your-domain.com/oauth/callback`
 4. **Scopes needed**: `data:read_write` (full task/project access)
 
 ### Token Storage Architecture
@@ -138,7 +138,7 @@ Based on the do-vps-prod repository:
 ### Proposed Domain
 
 ```
-https://todoist.rodda.xyz
+https://todoist.your-domain.com
 ```
 
 ### Caddy Configuration Addition
@@ -249,7 +249,7 @@ info:
   description: Manage your Todoist tasks, projects, and labels
   version: 1.0.0
 servers:
-  - url: https://todoist.rodda.xyz
+  - url: https://todoist.your-domain.com
     description: Production server
 
 components:
@@ -258,8 +258,8 @@ components:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: https://todoist.rodda.xyz/oauth/authorize
-          tokenUrl: https://todoist.rodda.xyz/oauth/token
+          authorizationUrl: https://todoist.your-domain.com/oauth/authorize
+          tokenUrl: https://todoist.your-domain.com/oauth/token
           scopes:
             todoist: Full access to Todoist data
 
@@ -338,7 +338,7 @@ paths:
 □ Create Dockerfile
 □ Add to do-vps-prod docker-compose.yml
 □ Add Caddy configuration
-□ Configure DNS (todoist.rodda.xyz)
+□ Configure DNS (todoist.your-domain.com)
 □ Deploy and verify HTTPS
 □ Test from external network
 ```

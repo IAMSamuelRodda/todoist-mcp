@@ -35,8 +35,8 @@ Add to your Claude Code MCP settings (`~/.claude/mcp_settings.json`):
 {
   "mcpServers": {
     "todoist": {
-      "command": "/home/samuel/repos/todoist-mcp/.venv/bin/python",
-      "args": ["/home/samuel/repos/todoist-mcp/todoist_mcp.py"],
+      "command": "/path/to/todoist-mcp/.venv/bin/python",
+      "args": ["/path/to/todoist-mcp/todoist_mcp.py"],
       "env": {
         "TODOIST_API_TOKEN": "your-api-token-here"
       }

@@ -38,7 +38,7 @@
 
 ### Claude Code MCP Registration
 - **Status**: Deployed (user scope)
-- **Command**: `claude mcp add todoist -s user --env TODOIST_API_TOKEN=... -- /home/samuel/repos/todoist-mcp/.venv/bin/python /home/samuel/repos/todoist-mcp/todoist_mcp.py`
+- **Command**: `claude mcp add todoist -s user --env TODOIST_API_TOKEN=... -- /path/to/todoist-mcp/.venv/bin/python /path/to/todoist-mcp/todoist_mcp.py`
 - **Verification**: `claude mcp list`
 
 ---
