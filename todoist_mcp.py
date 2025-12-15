@@ -659,6 +659,9 @@ async def todoist_create_task(params: CreateTaskInput) -> str:
     """
     Create a new task in Todoist.
 
+    ⚠️ TEMPORAL CHECK: Verify year in due_date matches current year from
+    system date. LLMs often default to training-data years (2023/2024).
+
     Supports natural language due dates like 'tomorrow', 'next Monday', 'every week'.
     Priority 4 is highest (red), priority 1 is lowest.
 
