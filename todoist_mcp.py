@@ -451,6 +451,12 @@ async def _make_api_request(
 
 def _handle_api_error(e: Exception) -> str:
     """Format API errors with actionable messages."""
+    # Check for credential/OpenBao errors first (before generic errors)
+    error_str = str(e).lower()
+    if isinstance(e, ValueError) and ("openbao" in error_str or "api_token" in error_str or "agent" in error_str):
+        # Pass through the detailed ValueError from credential functions
+        return f"Error: {str(e)}"
+
     if isinstance(e, httpx.HTTPStatusError):
         status = e.response.status_code
         if status == 400:
