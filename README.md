@@ -10,7 +10,28 @@ MCP (Model Context Protocol) server for Todoist integration, allowing AI assista
 - **Filters**: Support for Todoist filter syntax (`today`, `overdue`, `p1`, etc.)
 - **Natural language dates**: Use `tomorrow`, `next Monday`, `every week`, etc.
 
-## Setup
+## Quick Install (Claude Code)
+
+```bash
+# Clone the repository
+git clone https://github.com/IAMSamuelRodda/todoist-mcp.git
+cd todoist-mcp
+
+# Create config from example
+cp config.json.example config.json
+
+# Edit config.json with your Todoist API token
+# Get token from: Todoist Settings → Integrations → Developer
+# Then run the install script
+./install.sh
+```
+
+The install script will:
+1. Create a Python virtual environment
+2. Install dependencies
+3. Register the MCP server with Claude Code
+
+## Manual Installation
 
 ### 1. Get Your Todoist API Token
 
@@ -21,15 +42,14 @@ MCP (Model Context Protocol) server for Todoist integration, allowing AI assista
 ### 2. Install Dependencies
 
 ```bash
-cd repos/todoist-mcp
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
-uv pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 3. Configure Claude Code
 
-Add to your Claude Code MCP settings (`~/.claude/mcp_settings.json`):
+Add to your Claude Code MCP settings:
 
 ```json
 {
