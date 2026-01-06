@@ -1,0 +1,22 @@
+{
+  "name": "todoist-mcp",
+  "version": "1.0.0",
+  "description": "Todoist task management MCP server with natural language dates and filters",
+  "author": {
+    "name": "Samuel Rodda",
+    "email": "samuel@arcforge.au"
+  },
+  "homepage": "https://github.com/IAMSamuelRodda/todoist-mcp",
+  "repository": "https://github.com/IAMSamuelRodda/todoist-mcp",
+  "license": "MIT",
+  "keywords": ["todoist", "tasks", "mcp", "productivity", "todo", "natural-language"],
+  "mcpServers": {
+    "todoist": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/IAMSamuelRodda/todoist-mcp", "todoist-mcp"],
+      "env": {
+        "TODOIST_API_TOKEN": "${TODOIST_API_TOKEN}"
+      }
+    }
+  }
+}

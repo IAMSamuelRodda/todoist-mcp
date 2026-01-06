@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "todoist-mcp"
+version = "1.0.0"
+description = "Todoist task management MCP server with natural language dates"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.0.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+todoist-mcp = "todoist_mcp:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+include = ["todoist_mcp.py"]

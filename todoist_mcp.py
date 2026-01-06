@@ -7,22 +7,14 @@ task management, project organization, and label handling.
 
 Requirements:
     - Todoist account with API access
-    - OpenBao agent for secure credential management (production)
 
-Credential Resolution Order:
-    1. OpenBao Agent at http://127.0.0.1:18200
-       Pattern: secret/{client}/{environment}-mcp-todoist-{username}
-       Example: secret/client0/prod-mcp-todoist-samuelrodda
-    2. TODOIST_API_TOKEN environment variable (dev-only when OPENBAO_DEV_MODE=1)
+Credential Resolution (in order):
+    1. OpenBao Agent (if available at http://127.0.0.1:18200)
+    2. TODOIST_API_TOKEN environment variable
 
 Environment variables:
-    ARC_CLIENT: (Optional) Arc Forge namespace, defaults to 'client0'
-    ARC_ENVIRONMENT: (Optional) Environment prefix, defaults to 'prod'
-    ARC_USERNAME: (Optional) Username for user-scoped secrets, defaults to 'samuelrodda'
-    OPENBAO_DEV_MODE: (Optional) Set to '1' to enable env var fallback for development
-    TODOIST_API_TOKEN: (Dev fallback only) API token from Todoist Settings → Integrations
+    TODOIST_API_TOKEN: API token from Todoist Settings → Integrations
     OPENBAO_AGENT_ADDR: (Optional) Agent address, defaults to http://127.0.0.1:18200
-    OPENBAO_AGENT_TIMEOUT: (Optional) Agent timeout in seconds, defaults to 5.0
 """
 
 import json
@@ -371,12 +363,23 @@ class CreateLabelInput(BaseModel):
 # =============================================================================
 
 
+def _is_openbao_agent_available() -> bool:
+    """Check if OpenBao agent is reachable."""
+    try:
+        with _get_openbao_client() as client:
+            response = client.get("/v1/sys/health")
+            return response.status_code in (200, 429, 472, 473, 501, 503)
+    except Exception:
+        return False
+
+
 def _get_api_token() -> str:
     """
-    Get Todoist API token from OpenBao agent with dev fallback.
+    Get Todoist API token from OpenBao agent or environment variable.
 
-    Uses Arc Forge secret path pattern:
-    secret/{client}/{environment}-mcp-todoist-{username}
+    Credential Resolution (in order):
+    1. OpenBao Agent (if available)
+    2. TODOIST_API_TOKEN environment variable
 
     Returns:
         API token string.
@@ -384,40 +387,28 @@ def _get_api_token() -> str:
     Raises:
         ValueError: If API token cannot be retrieved.
     """
-    secret_path = _build_todoist_secret_path()
+    # Try OpenBao first if agent is available
+    if _is_openbao_agent_available():
+        try:
+            secret_path = _build_todoist_secret_path()
+            secret_data = _get_secret_from_agent(secret_path)
+            api_token = secret_data.get("api_token") or secret_data.get("token")
 
-    try:
-        secret_data = _get_secret_from_agent(secret_path)
-        api_token = secret_data.get("api_token") or secret_data.get("token")
+            if api_token:
+                return api_token
+        except OpenBaoError:
+            pass  # Fall through to env var
 
-        if not api_token:
-            raise SecretNotFoundError(f"'api_token' key not found in {secret_path} secret")
-
+    # Fallback to environment variable
+    api_token = os.getenv("TODOIST_API_TOKEN")
+    if api_token:
         return api_token
 
-    except OpenBaoError as e:
-        # Dev-only fallback to environment variable
-        if DEV_MODE:
-            api_token = os.getenv("TODOIST_API_TOKEN")
-            if api_token:
-                print(
-                    f"[DEV MODE] Using TODOIST_API_TOKEN env var (agent error: {type(e).__name__}). "
-                    "This fallback is disabled in production.",
-                    file=sys.stderr
-                )
-                return api_token
-
-        # Production or no fallback available
-        raise ValueError(
-            f"Failed to retrieve Todoist API token from agent: {e}\n"
-            f"Expected path: secret/{secret_path}\n\n"
-            f"To create this secret, connect to your OpenBao server and run:\n"
-            f"  bao kv put secret/{secret_path} api_token=\"your-todoist-token\"\n\n"
-            f"Get your token from: Todoist Settings → Integrations → Developer → API token\n\n"
-            f"Or for development, enable dev mode:\n"
-            f"  export OPENBAO_DEV_MODE=1\n"
-            f"  export TODOIST_API_TOKEN=your-token"
-        )
+    raise ValueError(
+        "Todoist API token not found.\n"
+        "Set TODOIST_API_TOKEN environment variable.\n\n"
+        "Get your token from: Todoist Settings → Integrations → Developer → API token"
+    )
 
 
 async def _make_api_request(
@@ -1085,5 +1076,10 @@ async def todoist_create_label(params: CreateLabelInput) -> str:
 # =============================================================================
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for todoist-mcp command."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
