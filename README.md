@@ -1,6 +1,6 @@
 # Todoist MCP Server
 
-MCP (Model Context Protocol) server for Todoist integration, allowing AI assistants to manage your tasks, projects, and labels.
+MCP server for Todoist task management. Provides 12 tools for tasks, projects, and labels.
 
 ## Features
 
@@ -10,59 +10,74 @@ MCP (Model Context Protocol) server for Todoist integration, allowing AI assista
 - **Filters**: Support for Todoist filter syntax (`today`, `overdue`, `p1`, etc.)
 - **Natural language dates**: Use `tomorrow`, `next Monday`, `every week`, etc.
 
-## Quick Install (Claude Code)
+## Installation
 
-```bash
-# Clone the repository
-git clone https://github.com/IAMSamuelRodda/todoist-mcp.git
-cd todoist-mcp
+### Option 1: uvx (Recommended)
 
-# Create config from example
-cp config.json.example config.json
-
-# Edit config.json with your Todoist API token
-# Get token from: Todoist Settings → Integrations → Developer
-# Then run the install script
-./install.sh
-```
-
-The install script will:
-1. Create a Python virtual environment
-2. Install dependencies
-3. Register the MCP server with Claude Code
-
-## Manual Installation
-
-### 1. Get Your Todoist API Token
-
-1. Open Todoist (web or app)
-2. Go to **Settings** → **Integrations** → **Developer**
-3. Copy your **API token**
-
-### 2. Install Dependencies
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 3. Configure Claude Code
-
-Add to your Claude Code MCP settings:
+Zero-install method using [uv](https://docs.astral.sh/uv/). Add to `~/.claude.json`:
 
 ```json
 {
   "mcpServers": {
     "todoist": {
-      "command": "/path/to/todoist-mcp/.venv/bin/python",
-      "args": ["/path/to/todoist-mcp/todoist_mcp.py"],
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/IAMSamuelRodda/todoist-mcp", "todoist-mcp"],
       "env": {
-        "TODOIST_API_TOKEN": "your-api-token-here"
+        "TODOIST_API_TOKEN": "your-api-token"
       }
     }
   }
 }
+```
+
+### Option 2: Local Clone
+
+```bash
+mkdir -p ~/.claude/mcp-servers
+git clone https://github.com/IAMSamuelRodda/todoist-mcp.git ~/.claude/mcp-servers/todoist-mcp
+cd ~/.claude/mcp-servers/todoist-mcp
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Add to `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "todoist": {
+      "command": "~/.claude/mcp-servers/todoist-mcp/.venv/bin/python",
+      "args": ["~/.claude/mcp-servers/todoist-mcp/todoist_mcp.py"],
+      "env": {
+        "TODOIST_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+### Get Your API Token
+
+1. Open Todoist (web or app)
+2. Go to **Settings** → **Integrations** → **Developer**
+3. Copy your **API token**
+
+## Updating
+
+### uvx users
+
+```bash
+uv cache clean todoist-mcp
+```
+
+### Local clone users
+
+```bash
+cd ~/.claude/mcp-servers/todoist-mcp
+git pull
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ## Available Tools
